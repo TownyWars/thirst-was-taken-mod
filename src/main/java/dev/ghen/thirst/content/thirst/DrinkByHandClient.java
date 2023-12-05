@@ -12,23 +12,28 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class DrinkByHandClient
-{
-    public static void drinkByHand()
-    {
+public class DrinkByHandClient {
+    public static void drinkByHand() {
         Minecraft mc = Minecraft.getInstance();
 
         Player player = mc.player;
         Level level = mc.level;
-        BlockPos blockPos = MathHelper.getPlayerPOVHitResult(level, player, ClipContext.Fluid.ANY).getBlockPos();
+        BlockPos blockPos = MathHelper.getPlayerPOVHitResult(level, player).getBlockPos();
 
-        if ((player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty() || player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty()) &&
-                level.getFluidState(blockPos).is(FluidTags.WATER) && player.isCrouching() && !player.isInvulnerable()) {
-            level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_DRINK, SoundSource.NEUTRAL, 1.0F, 1.0F);
+        Block drinkBlock = level.getBlockState(blockPos).getBlock();
+
+        String blockName = drinkBlock.getRegistryName().toString();
+
+        if (player.getItemInHand(InteractionHand.MAIN_HAND).isEmpty() &&
+                (level.getFluidState(blockPos).is(FluidTags.WATER) || blockName.contains("puddle"))
+                && player.isCrouching() && !player.isInvulnerable()) {
+            level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_DRINK,
+                    SoundSource.NEUTRAL, 1.0F, 1.0F);
             ThirstModPacketHandler.INSTANCE.sendToServer(new DrinkByHandMessage(blockPos));
         }
     }

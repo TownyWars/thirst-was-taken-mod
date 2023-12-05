@@ -45,7 +45,9 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import org.slf4j.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -55,7 +57,7 @@ public class WaterPurity
 {
     private static List<ContainerWithPurity> waterContainers = new ArrayList<>();
     private static List<Block> fillablesWithPurity = new ArrayList<>();
-    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
     public static final int MIN_PURITY = 0;
     public static final int MAX_PURITY = 3;
 
@@ -414,11 +416,14 @@ public class WaterPurity
      */
     public static int getBlockPurity(Level level, BlockPos pos)
     {
-
         int purity = (pos.getY() > CommonConfig.MOUNTAINS_Y.get().intValue() || pos.getY() < CommonConfig.CAVES_Y.get().intValue())
                 && (!isBiomeWaterSalty(level.getBiome(pos).value()) || pos.getY() < CommonConfig.MOUNTAINS_Y.get().intValue() - 32) ? 1 : 0;
 
-        if(level.getFluidState(pos).is(FluidTags.WATER))
+        LOGGER.log(org.apache.logging.log4j.Level.INFO, "getBlockPurity " + level.getBlockState(pos).getBlock().getRegistryName().toString() + "  " + purity);
+
+        if (level.getBlockState(pos).getBlock().getRegistryName().toString().contains("puddle")) {
+            return 0;
+        } else if(level.getFluidState(pos).is(FluidTags.WATER))
         {
             if(!level.getFluidState(pos).isSource())
                 purity = Math.min(purity + CommonConfig.RUNNING_WATER_PURIFICATION_AMOUNT.get().intValue(), MAX_PURITY);

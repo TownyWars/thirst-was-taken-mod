@@ -80,7 +80,6 @@ public class PlayerThirstCap implements IThirstCap
 
         if (exhaustion > 4)
         {
-            LOGGER.info(quenched + "");
             exhaustion -= 4;
             if (quenched > 0)
             {
